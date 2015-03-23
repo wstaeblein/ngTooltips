@@ -1,0 +1,214 @@
+<html ng-app="ng-Tooltips">
+<head>
+	<title>Diretiva de Tooltips</title>
+    <style type="text/css">
+        body { font: normal 12px arial;}
+
+        .tooltip_box
+        {
+            position: absolute;
+            background: #000000;
+            border: 1px solid #999999;
+            color: White;
+            padding: 7px;
+            border-radius: 5px;
+            display: table-cell;
+            z-index: 10000;
+        }
+        .tooltip_box:after, .tooltip_box:before
+        {
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .tooltip_box:after
+        {
+            border-color: rgba(0, 0, 0, 0);
+            border-width: 7px;
+        }
+        .tooltip_box:before
+        {
+            border-color: rgba(153, 153, 153, 0);
+            border-width: 8px;
+        }
+
+
+        /* BOTTOM */
+        .tooltip_box.bottom:after, .tooltip_box.bottom:before {
+            bottom: 100%;
+            left: 31px;
+        }
+        .tooltip_box.bottom:after {
+            border-bottom-color: #000000;
+            margin-left: -7px;
+        }
+        .tooltip_box.bottom:before {
+            border-bottom-color: #999999;
+            margin-left: -8px;
+        }
+
+
+        /* TOP */
+        .tooltip_box.top:after, .tooltip_box.top:before {
+            top: 100%;
+            left: 31px;
+        }
+        .tooltip_box.top:after {
+            border-top-color: #000000;
+            margin-left: -7px;
+        }
+        .tooltip_box.top:before {
+            border-top-color: #999999;
+            margin-left: -8px;            
+        }
+
+
+        /* RIGHT */
+        .tooltip_box.right:after, .tooltip_box.right:before {
+            right: 100%;
+            top: 13px;
+        }
+        .tooltip_box.right:after {
+            border-right-color: #000000;
+            margin-top: -7px;
+
+        }
+        .tooltip_box.right:before {
+            border-right-color: #999999;
+            margin-top: -8px;
+        }     
+
+
+        /* LEFT */
+        .tooltip_box.left:after, .tooltip_box.left:before {
+            left: 100%;
+            top: 13px;
+        }
+        .tooltip_box.left:after {
+            border-left-color: #000000;
+            margin-top: -7px;
+
+        }
+        .tooltip_box.left:before {
+            border-left-color: #999999;
+            margin-top: -8px;
+        }            
+    </style>
+</head>
+<body>
+
+	<h3>Exemplos</div>
+
+
+    <div style="margin: 50px">
+    	<div>
+    		<a href="#" tooltip="Exemplo de tooltip" tooltip-pos="top">Clique Me</a>
+    	</div>
+        <br /><br />
+        <div>
+            <a href="#" tooltip="Exemplo de tooltip" tooltip-pos="bottom">Outro Link</a>
+        </div>     
+
+        <br /><br />
+        <div>
+            <a href="#" tooltip="Exemplo de tooltip<br />Com 2 linhas" tooltip-pos="right">Link com tip a direita</a>
+        </div>  
+
+        <br /><br />
+        <div style="margin-left: 120px">
+            <a href="#" tooltip="Exemplo de tooltip" tooltip-pos="left">Link com tip a esquerda</a>
+        </div>   
+        <br /><br />
+        <div>
+            <a href="#" tooltip="Exemplo de tooltip" tooltip-pos="bottom" tooltip-dismiss="click">Fecha com click</a>
+        </div>  
+
+            <br /><br />    <br /><br />    
+        <div>
+            <div style="background-color: darkblue; color: white; width: 200px; padding: 10px; border-radius: 10px" tooltip="#exemplo" tooltip-pos="top">Exemplo de tooltip vinda de elemento</a>
+        </div>
+
+    </div>
+
+    <div id="exemplo" style="display: none">
+        <h3>Tooltip de Conteúdo estático</h3>
+
+        <p>Exemplo de texto</p>
+    </div>
+<script src="js/jquery-1.11.1.min.js" type="text/javascript"></script>
+<script src="js/angular.min.js" type="text/javascript"></script>
+
+	<script type="text/javascript">
+
+        var app = angular.module('ng-Tooltips', []);
+
+        // =====================================================================
+        // Diretiva que gera tooltips em elementos com o atributo tooltip="..."
+        // =====================================================================
+        // Os outros atributos
+        // tooltip-pos --> Posição do tooltip ('left, right, top [default], bottom'). 
+        // tooltip-dismiss --> Mecanismo de ativação / desativação do tooltip. Formato: mouse ou mouse|click Pode ser click ou mouse [default]
+        app.directive('tooltip', function() {
+            return {
+                restrict: 'A',
+                compile: function(element, attributes) {
+
+                    var tag = $('<div style="display: none"></div>');
+                    $('body').append(tag);
+
+                    return function(scope, element, attr) {
+
+                        $(element).on('mouseover', function(ele, evt) { 
+
+                            var elePos = $(element).offset();
+                            var content = attr.tooltip;
+                            var top = 0, left = 0, xclass = attr.tooltipPos;
+
+                            if (content.substring(0, 1) == '#') { content = $(content).html(); }
+                            tag.html(content);
+
+                            switch(xclass) {
+                                case 'bottom':
+                                    top = elePos.top + tag.height() + 12;
+                                    left = elePos.left - 25;
+                                    break;
+
+                                case 'right':
+                                    top = elePos.top - 5;
+                                    left = elePos.left + $(element).width() + 15;
+                                    break;
+
+                                case 'left':
+                                    top = elePos.top - 5;
+                                    left = elePos.left - tag.width() - 30;
+                                    break;
+
+                                default:
+                                    top = elePos.top - tag.height() - 25;
+                                    left = elePos.left - 25;
+                                    xclass = ' top';
+                                    break;
+                            }
+
+                            tag.removeClass().addClass('tooltip_box ' + xclass);
+                            if (top < 0) { top = 0; }
+                            if (left < 0) { left = 0; }
+
+                            tag.fadeIn(300).css({ 'top': top, 'left': left });
+                        });
+                        
+                        if (attr.tooltipDismiss && attr.tooltipDismiss == 'click') {
+                            tag.on('click', function() { tag.fadeOut(300); });
+                        } else {
+                            $(element).on('mouseout', function() { tag.fadeOut(300); });
+                        }
+                    }
+                }
+            }
+        });
+	</script>
+</body>
+</html>
