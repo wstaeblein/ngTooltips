@@ -19,7 +19,9 @@
                     var triggerEvent = 'mouseover';
                     if (attr.tooltipTrigger && attr.tooltipTrigger == 'click') { triggerEvent = 'click'; }
 
-                    $(element).on(triggerEvent, function(ele, evt) { 
+                    $(element).on(triggerEvent, function(evt) { 
+
+                        evt.stopPropagation();
 
                         var elePos = $(element).offset();
                         var content = attr.tooltip;
@@ -51,12 +53,18 @@
                         if (top < 0) { top = 0; }
                         if (left < 0) { left = 0; }
                         tag.fadeIn(300).css({ 'top': top, 'left': left });
+
+                        return false;
                     });
                     
                     if (attr.tooltipDismiss && attr.tooltipDismiss == 'click') {
                         tag.on('click', function() { tag.fadeOut(300); });
                     } else {
-                        $(element).on('mouseout', function() { tag.fadeOut(300); });
+                        $(element).on('mouseleave', function(evt) { 
+
+                            tag.fadeOut(300); 
+
+                        });
                     }
                 }
             }
